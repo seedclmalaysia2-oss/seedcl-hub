@@ -1,14 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Internal department hub for SEED CL Malaysia.">
-<meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231e2761'/><text x='50' y='68' font-size='52' font-family='Georgia,serif' font-weight='600' fill='%23f4f7ff' text-anchor='middle'>SC</text></svg>">
-<title>SEED CL Malaysia Hub</title>
-<style>
-  :root {
+:root {
     --ink-950: #0b0f2b;
     --ink-900: #141a3d;
     --ink-800: #1e2761;
@@ -341,136 +331,103 @@
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; }
   }
-</style>
-</head>
-<body>
 
-<div class="wrap">
+/* ---------- added for the signed-in app ---------- */
 
-  <header class="masthead">
-    <div class="mark">SC</div>
-    <div>
-      <h1>SEED CL Malaysia — Internal Hub</h1>
-      <p>One door to every department dashboard. Each team runs on its own subdomain; sign in there with your department credentials.</p>
-    </div>
-    <div class="spacer"></div>
-    <div class="count">
-      <div class="num">2 / 8</div>
-      <div class="label">Live</div>
-    </div>
-  </header>
+.userbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  padding-bottom: 12px;
+}
 
-  <section class="group">
-    <div class="group-head">
-      <span class="label">In service</span>
-      <span class="rule"></span>
-      <span class="n">2</span>
-    </div>
-    <div class="grid">
+.signout {
+  background: none;
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
 
-      <a class="dept" href="https://sales.seedclmalaysiastore.com">
-        <div class="dept-top">
-          <h2>Sales</h2>
-          <span class="pill live"><span class="dot"></span>Live</span>
-        </div>
-        <p class="desc">Sales performance tracking for the Malaysia team — targets, outlet and region rollups.</p>
-        <div class="host"><span class="arrow">→</span> sales.seedclmalaysiastore.com</div>
-      </a>
+.signout:hover { border-color: var(--ink-600); color: var(--text-primary); }
 
-      <a class="dept" href="https://gmdashboard.seedclmalaysiastore.com">
-        <div class="dept-top">
-          <h2>Administration</h2>
-          <span class="pill live"><span class="dot"></span>Live</span>
-        </div>
-        <p class="desc">GM report dashboard — import POS files, edit the 13 report sections, export the HQ deck as PPTX.</p>
-        <div class="host"><span class="arrow">→</span> gmdashboard.seedclmalaysiastore.com</div>
-      </a>
+/* ---------- login ---------- */
 
-    </div>
-  </section>
+.login-wrap {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
 
-  <section class="group">
-    <div class="group-head">
-      <span class="label">In build</span>
-      <span class="rule"></span>
-      <span class="n">2</span>
-    </div>
-    <div class="grid">
+.login-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 18px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--shadow);
+}
 
-      <div class="dept planned">
-        <div class="dept-top">
-          <h2>Human Resources</h2>
-          <span class="pill build"><span class="dot"></span>In build</span>
-        </div>
-        <p class="desc">Staff records, leave and claims, evaluation forms. Code started on seed-admin2.</p>
-        <div class="host">hr.seedclmalaysiastore.com</div>
-      </div>
+.login-card .mark { margin-bottom: 2px; }
 
-      <div class="dept planned">
-        <div class="dept-top">
-          <h2>Account</h2>
-          <span class="pill build"><span class="dot"></span>In build</span>
-        </div>
-        <p class="desc">AR collection, payables and cashflow — the figures that today land in Slide 14 by hand.</p>
-        <div class="host">account.seedclmalaysiastore.com</div>
-      </div>
+.login-card h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
 
-    </div>
-  </section>
+.login-card p { margin: 0; font-size: 0.875rem; color: var(--text-secondary); }
 
-  <section class="group">
-    <div class="group-head">
-      <span class="label">Not started</span>
-      <span class="rule"></span>
-      <span class="n">4</span>
-    </div>
-    <div class="grid">
+.field {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: 9px;
+  border: 1px solid var(--border-strong);
+  background: var(--page-bg);
+  color: var(--text-primary);
+  font: inherit;
+}
 
-      <div class="dept planned">
-        <div class="dept-top">
-          <h2>Marketing</h2>
-          <span class="pill queued"><span class="dot"></span>Queued</span>
-        </div>
-        <p class="desc">Campaign calendar, promotion performance, social and content pipeline.</p>
-        <div class="host">marketing.seedclmalaysiastore.com</div>
-      </div>
+.field:focus-visible { outline: 2px solid var(--ink-600); outline-offset: 1px; }
 
-      <div class="dept planned">
-        <div class="dept-top">
-          <h2>Customer Service</h2>
-          <span class="pill queued"><span class="dot"></span>Queued</span>
-        </div>
-        <p class="desc">WhatsApp inbox, power inquiries, returns and exchange cases.</p>
-        <div class="host">service.seedclmalaysiastore.com</div>
-      </div>
+.submit {
+  width: 100%;
+  padding: 10px;
+  border-radius: 9px;
+  border: none;
+  background: var(--tile-ink);
+  color: #f4f7ff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
 
-      <div class="dept planned">
-        <div class="dept-top">
-          <h2>Warehouse</h2>
-          <span class="pill queued"><span class="dot"></span>Queued</span>
-        </div>
-        <p class="desc">Stock on hand, expiry watch, write-offs, shipments and stock issues.</p>
-        <div class="host">warehouse.seedclmalaysiastore.com</div>
-      </div>
+.submit:disabled { opacity: .6; cursor: default; }
 
-      <div class="dept planned">
-        <div class="dept-top">
-          <h2>Regulatory</h2>
-          <span class="pill queued"><span class="dot"></span>Queued</span>
-        </div>
-        <p class="desc">Product registration status, licence renewals and submission deadlines.</p>
-        <div class="host">regulatory.seedclmalaysiastore.com</div>
-      </div>
+.linkish {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
 
-    </div>
-  </section>
-
-  <div class="foot">
-    <span><span class="key">Live</span> — in daily use</span>
-    <span><span class="key">In build</span> — code exists, not deployed</span>
-    <span><span class="key">Queued</span> — not started</span>
-  </div>
-
-</div>
-</body>
-</html>
+.err { color: #b91c1c; font-size: 0.875rem; margin: 0; }
+.info { color: var(--text-secondary); font-size: 0.875rem; margin: 0; }

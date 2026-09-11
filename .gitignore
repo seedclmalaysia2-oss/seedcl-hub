@@ -1,6 +1,6 @@
 .vercel
 node_modules
+.next
+.env*.local
 .DS_Store
-
-# leftover from the abandoned two-project split — safe to delete the folder
-hub/
+next-env.d.ts
