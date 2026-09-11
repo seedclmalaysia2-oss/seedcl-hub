@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import type { CookieToSet } from "@/lib/supabase/cookies";
+import { createServerClient, type CookieMethodsServer } from "@supabase/ssr";
 
 /**
  * Refreshes the Supabase session cookie and bounces signed-out visitors to
@@ -17,23 +16,22 @@ import type { CookieToSet } from "@/lib/supabase/cookies";
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req });
 
+  // Annotated for the same reason as in src/lib/supabase/server.ts.
+  const cookieMethods: CookieMethodsServer = {
+    getAll: () => req.cookies.getAll(),
+    setAll: (cookiesToSet) => {
+      cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
+      res = NextResponse.next({ request: req });
+      cookiesToSet.forEach(({ name, value, options }) =>
+        res.cookies.set(name, value, options),
+      );
+    },
+  };
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return req.cookies.getAll();
-        },
-        setAll(cookiesToSet: CookieToSet[]) {
-          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
-          res = NextResponse.next({ request: req });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            res.cookies.set(name, value, options),
-          );
-        },
-      },
-    },
+    { cookies: cookieMethods },
   );
 
   const { data: { user } } = await supabase.auth.getUser();
