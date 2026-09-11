@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Internal department hub for SEED CL Malaysia.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231e2761'/><text x='50' y='68' font-size='52' font-family='Georgia,serif' font-weight='600' fill='%23f4f7ff' text-anchor='middle'>SC</text></svg>">
+<title>SEED CL Malaysia Hub</title>
+<style>
+  :root {
+    --ink-950: #0b0f2b;
+    --ink-900: #141a3d;
+    --ink-800: #1e2761;
+    --ink-700: #2b3883;
+    --ink-600: #4353a6;
+    --ice-200: #cadcfc;
+    --ice-100: #e4ecff;
+    --ice-50:  #f4f7ff;
+    --accent:  #f96167;
+    --accent-2: #f9e795;
+    --ok: #2c8a4a;
+    --warn: #d97706;
+
+    --page-bg: #f6f7fb;
+    --surface: #ffffff;
+    --surface-quiet: #f4f7ff;
+    --text-primary: #141a3d;
+    --text-secondary: #4353a6;
+    --text-muted: #6b7280;
+    --border-subtle: #e4ecff;
+    --border-strong: #cadcfc;
+    --tile-ink: #1e2761;
+    --shadow: 0 1px 2px rgba(20, 26, 61, .06), 0 8px 24px -16px rgba(20, 26, 61, .35);
+    --shadow-lift: 0 2px 4px rgba(20, 26, 61, .08), 0 18px 36px -20px rgba(20, 26, 61, .45);
+
+    --font-display: Cambria, Georgia, "Times New Roman", serif;
+    --font-body: Calibri, "Segoe UI", Inter, system-ui, sans-serif;
+    --font-mono: ui-monospace, "Cascadia Code", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page-bg: #0b0f2b;
+      --surface: #141a3d;
+      --surface-quiet: #111739;
+      --text-primary: #f4f7ff;
+      --text-secondary: #a8bbe8;
+      --text-muted: #8a96b8;
+      --border-subtle: #232c5c;
+      --border-strong: #2b3883;
+      --tile-ink: #2b3883;
+      --ok: #4cb972;
+      --warn: #eda13c;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+      --shadow-lift: 0 2px 4px rgba(0, 0, 0, .5), 0 18px 36px -20px rgba(0, 0, 0, .9);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --page-bg: #0b0f2b;
+    --surface: #141a3d;
+    --surface-quiet: #111739;
+    --text-primary: #f4f7ff;
+    --text-secondary: #a8bbe8;
+    --text-muted: #8a96b8;
+    --border-subtle: #232c5c;
+    --border-strong: #2b3883;
+    --tile-ink: #2b3883;
+    --ok: #4cb972;
+    --warn: #eda13c;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+    --shadow-lift: 0 2px 4px rgba(0, 0, 0, .5), 0 18px 36px -20px rgba(0, 0, 0, .9);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--page-bg);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 40px 64px;
+  }
+
+  /* ---------- header ---------- */
+
+  .masthead {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .mark {
+    flex: none;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: var(--tile-ink);
+    color: #f4f7ff;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: .02em;
+  }
+
+  .masthead h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.875rem;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .masthead p {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+    max-width: 58ch;
+  }
+
+  .masthead .spacer { flex: 1 1 auto; }
+
+  .count {
+    flex: none;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .count .num {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1;
+    font-weight: 600;
+  }
+
+  .label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ---------- groups ---------- */
+
+  .group { margin-top: 40px; }
+
+  .group-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .group-head .rule {
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--border-subtle);
+  }
+
+  .group-head .n {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
+    gap: 16px;
+  }
+
+  /* ---------- live tile ---------- */
+
+  .dept {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px 18px 16px;
+    border-radius: 16px;
+    text-decoration: none;
+    color: inherit;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow);
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+  }
+
+  .dept:hover,
+  .dept:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+    border-color: var(--ink-600);
+  }
+
+  .dept:focus-visible {
+    outline: 2px solid var(--ink-600);
+    outline-offset: 3px;
+  }
+
+  .dept-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .dept h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .dept .desc {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+  }
+
+  .host {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    word-break: break-all;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-subtle);
+  }
+
+  .host .arrow {
+    flex: none;
+    transition: transform .16s ease;
+  }
+
+  .dept:hover .host .arrow { transform: translateX(3px); }
+
+  /* ---------- status pills ---------- */
+
+  .pill {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .pill.live {
+    color: var(--ok);
+    background: color-mix(in srgb, var(--ok) 12%, transparent);
+  }
+
+  .pill.build {
+    color: var(--warn);
+    background: color-mix(in srgb, var(--warn) 14%, transparent);
+  }
+
+  .pill.queued {
+    color: var(--text-muted);
+    background: color-mix(in srgb, var(--text-muted) 12%, transparent);
+  }
+
+  /* ---------- planned tile ---------- */
+
+  .dept.planned {
+    background: var(--surface-quiet);
+    border: 1px dashed var(--border-strong);
+    box-shadow: none;
+    cursor: default;
+  }
+
+  .dept.planned:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--border-strong);
+  }
+
+  .dept.planned h2 { color: var(--text-secondary); }
+
+  .dept.planned .host {
+    border-top-color: transparent;
+    color: var(--text-muted);
+    opacity: .85;
+  }
+
+  /* ---------- footer ---------- */
+
+  .foot {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    align-items: baseline;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+  }
+
+  .foot .key { color: var(--text-secondary); }
+
+  @media (max-width: 560px) {
+    .masthead { flex-wrap: wrap; }
+    .count { text-align: left; }
+    .wrap { padding-block: 28px 48px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="mark">SC</div>
+    <div>
+      <h1>SEED CL Malaysia — Internal Hub</h1>
+      <p>One door to every department dashboard. Each team runs on its own subdomain; sign in there with your department credentials.</p>
+    </div>
+    <div class="spacer"></div>
+    <div class="count">
+      <div class="num">2 / 8</div>
+      <div class="label">Live</div>
+    </div>
+  </header>
+
+  <section class="group">
+    <div class="group-head">
+      <span class="label">In service</span>
+      <span class="rule"></span>
+      <span class="n">2</span>
+    </div>
+    <div class="grid">
+
+      <a class="dept" href="https://sales.seedclmalaysiastore.com">
+        <div class="dept-top">
+          <h2>Sales</h2>
+          <span class="pill live"><span class="dot"></span>Live</span>
+        </div>
+        <p class="desc">Sales performance tracking for the Malaysia team — targets, outlet and region rollups.</p>
+        <div class="host"><span class="arrow">→</span> sales.seedclmalaysiastore.com</div>
+      </a>
+
+      <a class="dept" href="https://gmdashboard.seedclmalaysiastore.com">
+        <div class="dept-top">
+          <h2>Administration</h2>
+          <span class="pill live"><span class="dot"></span>Live</span>
+        </div>
+        <p class="desc">GM report dashboard — import POS files, edit the 13 report sections, export the HQ deck as PPTX.</p>
+        <div class="host"><span class="arrow">→</span> gmdashboard.seedclmalaysiastore.com</div>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-head">
+      <span class="label">In build</span>
+      <span class="rule"></span>
+      <span class="n">2</span>
+    </div>
+    <div class="grid">
+
+      <div class="dept planned">
+        <div class="dept-top">
+          <h2>Human Resources</h2>
+          <span class="pill build"><span class="dot"></span>In build</span>
+        </div>
+        <p class="desc">Staff records, leave and claims, evaluation forms. Code started on seed-admin2.</p>
+        <div class="host">hr.seedclmalaysiastore.com</div>
+      </div>
+
+      <div class="dept planned">
+        <div class="dept-top">
+          <h2>Account</h2>
+          <span class="pill build"><span class="dot"></span>In build</span>
+        </div>
+        <p class="desc">AR collection, payables and cashflow — the figures that today land in Slide 14 by hand.</p>
+        <div class="host">account.seedclmalaysiastore.com</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-head">
+      <span class="label">Not started</span>
+      <span class="rule"></span>
+      <span class="n">4</span>
+    </div>
+    <div class="grid">
+
+      <div class="dept planned">
+        <div class="dept-top">
+          <h2>Marketing</h2>
+          <span class="pill queued"><span class="dot"></span>Queued</span>
+        </div>
+        <p class="desc">Campaign calendar, promotion performance, social and content pipeline.</p>
+        <div class="host">marketing.seedclmalaysiastore.com</div>
+      </div>
+
+      <div class="dept planned">
+        <div class="dept-top">
+          <h2>Customer Service</h2>
+          <span class="pill queued"><span class="dot"></span>Queued</span>
+        </div>
+        <p class="desc">WhatsApp inbox, power inquiries, returns and exchange cases.</p>
+        <div class="host">service.seedclmalaysiastore.com</div>
+      </div>
+
+      <div class="dept planned">
+        <div class="dept-top">
+          <h2>Warehouse</h2>
+          <span class="pill queued"><span class="dot"></span>Queued</span>
+        </div>
+        <p class="desc">Stock on hand, expiry watch, write-offs, shipments and stock issues.</p>
+        <div class="host">warehouse.seedclmalaysiastore.com</div>
+      </div>
+
+      <div class="dept planned">
+        <div class="dept-top">
+          <h2>Regulatory</h2>
+          <span class="pill queued"><span class="dot"></span>Queued</span>
+        </div>
+        <p class="desc">Product registration status, licence renewals and submission deadlines.</p>
+        <div class="host">regulatory.seedclmalaysiastore.com</div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="foot">
+    <span><span class="key">Live</span> — in daily use</span>
+    <span><span class="key">In build</span> — code exists, not deployed</span>
+    <span><span class="key">Queued</span> — not started</span>
+  </div>
+
+</div>
+</body>
+</html>
