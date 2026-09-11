@@ -10,6 +10,7 @@
 // Vercel build with "Parameter 'toSet' implicitly has an 'any' type".
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import type { CookieToSet } from "./cookies";
 
 export async function supabaseServer() {
   const cookieStore = await cookies();
@@ -21,7 +22,7 @@ export async function supabaseServer() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: CookieToSet[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options),
