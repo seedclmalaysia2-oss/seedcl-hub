@@ -3,6 +3,11 @@
 // The hub shares its identity with every SEED CL department dashboard: one
 // Supabase project, one auth.users table, one session cookie. Someone signed in
 // at sales.seedclmalaysiastore.com is already signed in here.
+//
+// Note the method shorthand on getAll/setAll rather than arrow properties.
+// `cookies` is a union type, and TypeScript cannot contextually type an arrow
+// function's parameters through a union — it compiled locally and failed the
+// Vercel build with "Parameter 'toSet' implicitly has an 'any' type".
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -13,10 +18,12 @@ export async function supabaseServer() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (toSet) => {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
           try {
-            toSet.forEach(({ name, value, options }) =>
+            cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options),
             );
           } catch {
