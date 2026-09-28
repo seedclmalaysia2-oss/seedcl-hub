@@ -34,9 +34,9 @@ export const DEPARTMENTS: Department[] = [
   },
   {
     name: "Account",
-    description: "AR collection, payables and cashflow — the figures that today land in Slide 14 by hand.",
+    description: "Sales and purchase forecasts, the five-year forecast P&L with forecast detail and expenses. AR collection, payables and cashflow to follow.",
     host: "account.seedclmalaysiastore.com",
-    status: "build",
+    status: "live",
   },
   {
     name: "Marketing",
