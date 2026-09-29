@@ -30,7 +30,7 @@ export const DEPARTMENTS: Department[] = [
     name: "Human Resources",
     description: "Staff records, leave and claims, evaluation forms.",
     host: "hr.seedclmalaysiastore.com",
-    status: "build",
+    status: "live",
   },
   {
     name: "Account",
