@@ -52,9 +52,9 @@ export const DEPARTMENTS: Department[] = [
   },
   {
     name: "Warehouse",
-    description: "Stock on hand, expiry watch, write-offs, shipments and stock issues.",
+    description: "PO email to HQ and from customers. Customer consignment, PO conversion, BOC stock and the specialty CL monthly report to follow.",
     host: "warehouse.seedclmalaysiastore.com",
-    status: "queued",
+    status: "live",
   },
   {
     name: "Regulatory",
