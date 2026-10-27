@@ -471,7 +471,17 @@
   box-shadow: var(--shadow-lift);
 }
 
-.admin-dialog.wide { width: min(96vw, 1000px); max-height: 88dvh; overflow: auto; }
+/* Once unlocked, the Users panel takes the whole page. */
+.admin-dialog.wide {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  overflow: auto;
+}
 .admin-dialog::backdrop { background: rgba(11, 15, 43, .55); }
 
 .admin-gate {
@@ -641,3 +651,7 @@
 .adm-msg code { font-family: var(--font-mono); font-size: 0.75rem; }
 
 .adm-table td:first-child { min-width: 230px; }
+
+/* Salesperson sits under the email so the table fits without sideways scrolling. */
+.adm-table td:first-child .adm-sp { display: block; margin-top: 6px; }
+.adm-chips { min-width: 0; }

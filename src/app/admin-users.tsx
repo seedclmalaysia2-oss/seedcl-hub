@@ -223,7 +223,7 @@ export function AdminUsers({ selfEmail }: { selfEmail: string }) {
           <table className="adm-table">
             <thead>
               <tr>
-                <th>Account</th><th>Salesperson</th>{access && <th>Sections</th>}<th>Data access</th><th>Role</th><th>Last sign-in</th><th>Actions</th>
+                <th>Account / Salesperson</th>{access && <th>Sections</th>}<th>Data access</th><th>Role</th><th>Last sign-in</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -256,10 +256,8 @@ export function AdminUsers({ selfEmail }: { selfEmail: string }) {
                           >✎</button>
                         </div>
                       )}
-                    </td>
-                    <td>
                       <select
-                        className="field sm" value={r.sp ?? ""} disabled={busy}
+                        className="field sm adm-sp" value={r.sp ?? ""} disabled={busy}
                         aria-label={`Salesperson for ${r.email}`}
                         onChange={e => e.target.value !== r.sp && patch(r, { sp: e.target.value }, `${r.email} is now mapped to ${e.target.value}.`)}
                       >
