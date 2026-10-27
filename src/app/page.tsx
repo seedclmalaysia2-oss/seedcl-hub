@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { DEPARTMENTS, GROUPS, PILL_LABEL } from "./departments";
+import { AdminButton } from "./admin-button";
 import { SignOutButton } from "./sign-out-button";
 
 // Never prerender: the page depends on who is asking.
@@ -14,6 +15,16 @@ export default async function Home() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // Same role flag the Sales dashboard uses. RLS lets a user read only their own
+  // row, and if the read fails we treat the account as a non-admin. This decides
+  // what the Admin dialog shows; the admin_* functions enforce it in Postgres.
+  const { data: profile } = await supabase
+    .from("sp_user_map")
+    .select("is_admin")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const isAdmin = !!profile?.is_admin;
+
   const liveCount = DEPARTMENTS.filter(d => d.status === "live").length;
 
   return (
@@ -25,7 +36,7 @@ export default async function Home() {
 
       <header className="masthead">
         <div className="mark">SC</div>
-        <div>
+        <div className="masthead-title">
           <h1>SEED CL Malaysia — Internal Hub</h1>
           <p>
             One door to every department dashboard. Each team runs on its own
@@ -33,9 +44,12 @@ export default async function Home() {
           </p>
         </div>
         <div className="spacer" />
-        <div className="count">
-          <div className="num">{liveCount} / {DEPARTMENTS.length}</div>
-          <div className="label">Live</div>
+        <div className="masthead-side">
+          <div className="count">
+            <div className="num">{liveCount} / {DEPARTMENTS.length}</div>
+            <div className="label">Live</div>
+          </div>
+          <AdminButton email={user.email ?? ""} isAdmin={isAdmin} />
         </div>
       </header>
 

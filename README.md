@@ -62,6 +62,26 @@ user's `app.staff.departments` in `page.tsx` and filter the list, with
 `is_admin` seeing everything. The identity layer for that already exists — see
 `SUPABASE-CONSOLIDATION.md` in the Claude project. It's a change to one file.
 
+## Admin button (user control)
+
+The **Admin** button under the "x / 8 Live" counter opens the same Users panel the
+Sales dashboard has: add a user, change email, reset a password, promote or demote
+an admin, restrict someone to their own data, delete. It uses the same Supabase
+project, so it is the same accounts and nothing new to deploy.
+
+- **Password prompt.** Clicking it asks the signed-in person for their own account
+  password (`signInWithPassword`, checked by Supabase). A wrong password is
+  rejected. Closing the dialog locks it again. There is no shared admin password
+  and no new environment variable.
+- **Who can use it.** Only accounts with `sp_user_map.is_admin = true`. Anyone else
+  who enters their password is told the account isn't an admin.
+- **Where the rule is enforced.** In Postgres, not here. Each `admin_*` function
+  checks `current_user_is_admin()` and the last-admin guard is a database trigger.
+  The prompt is a step-up check on top of that, not the lock.
+- Files: `admin-button.tsx` (button + prompt), `admin-users.tsx` (panel).
+- Needs the Sales dashboard's migrations `0007`–`0018` to be applied (they already
+  are in the shared project).
+
 ## Security notes
 
 - `page.tsx` calls `supabase.auth.getUser()`, which validates the token with
