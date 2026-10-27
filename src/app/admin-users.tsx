@@ -9,6 +9,10 @@
 // as-is.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { DEPARTMENTS } from "./departments";
+
+// The sections an admin can grant: every dashboard that is live today.
+const SECTIONS = DEPARTMENTS.filter(d => d.status === "live");
 
 // Same list as the Sales dashboard's Users tab (every account maps to one).
 const SP_OPTIONS = ["Alan", "Dino", "Khen", "Sakinah", "Simon", "Seed Malaysia"];
@@ -27,6 +31,10 @@ const errText = (e: unknown) => (e instanceof Error ? e.message : String((e as {
 export function AdminUsers({ selfEmail }: { selfEmail: string }) {
   const supabase = useRef(supabaseBrowser()).current;
   const [rows, setRows] = useState<Row[]>([]);
+  // user_id -> app.staff.departments. null until loaded, or when the access
+  // functions are not installed yet (supabase/0001_department_access.sql).
+  const [access, setAccess] = useState<Map<string, string[]> | null>(null);
+  const [accessMissing, setAccessMissing] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -44,10 +52,21 @@ export function AdminUsers({ selfEmail }: { selfEmail: string }) {
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.rpc("admin_list_users");
+    const [users, staff] = await Promise.all([
+      supabase.rpc("admin_list_users"),
+      supabase.rpc("admin_list_staff_access"),
+    ]);
     if (!mounted.current) return;
-    if (error) setError(`Could not load users: ${error.message}`);
-    else { setRows((data as Row[]) ?? []); setError(""); }
+    if (users.error) setError(`Could not load users: ${users.error.message}`);
+    else { setRows((users.data as Row[]) ?? []); setError(""); }
+    if (staff.error) {
+      setAccess(null);
+      setAccessMissing(staff.error.message);
+    } else {
+      setAccess(new Map(((staff.data as { user_id: string; departments: string[] | null }[]) ?? [])
+        .map(s => [s.user_id, s.departments ?? []])));
+      setAccessMissing("");
+    }
     setLoading(false);
   }, [supabase]);
 
@@ -83,6 +102,17 @@ export function AdminUsers({ selfEmail }: { selfEmail: string }) {
       : `${r.email} is now a regular user.`);
   }
 
+  // Adds or removes one section, keeping anything else already on the person's
+  // list (keys this screen doesn't know about are left alone).
+  function toggleSection(r: Row, key: string, name: string) {
+    const current = access?.get(r.user_id) ?? [];
+    const has = current.includes(key);
+    const next = has ? current.filter(k => k !== key) : [...current, key];
+    run(r.user_id,
+      () => supabase.rpc("admin_set_user_departments", { p_user_id: r.user_id, p_departments: next }),
+      has ? `${r.email} can no longer open ${name}.` : `${r.email} can now open ${name}.`);
+  }
+
   function toggleViewAll(r: Row) {
     if (r.is_admin) return;
     const next = !r.can_view_all;
@@ -115,12 +145,22 @@ export function AdminUsers({ selfEmail }: { selfEmail: string }) {
     run(r.user_id, () => supabase.rpc("admin_delete_user", { p_user_id: r.user_id }), `${r.email} has been deleted.`);
   }
 
-  async function create(p: { email: string; password: string; sp: string; isAdmin: boolean; canViewAll: boolean }) {
+  async function create(p: { email: string; password: string; sp: string; isAdmin: boolean; canViewAll: boolean; sections: string[] }) {
     const ok = await run("__new__",
-      () => supabase.rpc("admin_create_user", {
-        p_email: p.email, p_password: p.password, p_sp: p.sp,
-        p_is_admin: p.isAdmin, p_can_view_all: p.canViewAll,
-      }),
+      async () => {
+        const made = await supabase.rpc("admin_create_user", {
+          p_email: p.email, p_password: p.password, p_sp: p.sp,
+          p_is_admin: p.isAdmin, p_can_view_all: p.canViewAll,
+        });
+        if (made.error) return made;
+        // Only when the access functions exist and something was ticked.
+        if (access && p.sections.length) {
+          return supabase.rpc("admin_set_user_departments", {
+            p_user_id: made.data as string, p_departments: p.sections,
+          });
+        }
+        return made;
+      },
       `Created ${p.email}${p.isAdmin ? " (admin)" : ""}. Share the password with them privately.`);
     if (ok) setAddOpen(false);
   }
@@ -142,15 +182,31 @@ export function AdminUsers({ selfEmail }: { selfEmail: string }) {
         </div>
       </div>
 
-      {addOpen && <AddUserForm busy={busyId === "__new__"} onSubmit={create} onCancel={() => setAddOpen(false)} />}
+      {addOpen && (
+        <AddUserForm busy={busyId === "__new__"} showSections={!!access}
+          onSubmit={create} onCancel={() => setAddOpen(false)} />
+      )}
 
       <p className="adm-help">
-        These are the same accounts that sign in to every department dashboard. <strong>Admin</strong> manages
-        users and uploaded files in the Sales dashboard. <strong>Own only</strong> restricts a user to their
-        own salesperson&apos;s rows there.
+        These are the same accounts that sign in to every department dashboard. <strong>Sections</strong> are
+        the dashboards a person may open; admins can open all of them.
+        {" "}<strong>Admin</strong> manages users and uploaded files in the Sales dashboard.
+        {" "}<strong>Own only</strong> restricts a user to their own salesperson&apos;s rows there.
+        {access && (
+          <> Account, Administration and Warehouse refuse anyone without their section. Sales and Human Resources
+          don&apos;t check sections yet, so ticking them only records the choice.</>
+        )}
       </p>
 
       {error && <div className="adm-msg bad" role="alert">⚠ {error}</div>}
+      {accessMissing && !loading && (
+        <div className="adm-msg warn" role="status">
+          <span>
+            Section access isn&apos;t switched on yet. Run <code>supabase/0001_department_access.sql</code> once
+            in the Supabase SQL editor to enable it. ({accessMissing})
+          </span>
+        </div>
+      )}
       {notice && (
         <div className="adm-msg ok" role="status">
           <span>✓ {notice}</span>
@@ -167,7 +223,7 @@ export function AdminUsers({ selfEmail }: { selfEmail: string }) {
           <table className="adm-table">
             <thead>
               <tr>
-                <th>Account</th><th>Salesperson</th><th>Data access</th><th>Role</th><th>Last sign-in</th><th>Actions</th>
+                <th>Account</th><th>Salesperson</th>{access && <th>Sections</th>}<th>Data access</th><th>Role</th><th>Last sign-in</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -211,6 +267,29 @@ export function AdminUsers({ selfEmail }: { selfEmail: string }) {
                         {SP_OPTIONS.map(sp => <option key={sp} value={sp}>{sp}</option>)}
                       </select>
                     </td>
+                    {access && (
+                      <td>
+                        {r.is_admin ? (
+                          <span className="adm-meta">All sections (admin)</span>
+                        ) : (
+                          <div className="adm-chips" role="group" aria-label={`Sections for ${r.email}`}>
+                            {SECTIONS.map(s => {
+                              const on = (access.get(r.user_id) ?? []).includes(s.key);
+                              return (
+                                <button
+                                  key={s.key} type="button" disabled={busy}
+                                  className={`chip${on ? " on" : ""}`} aria-pressed={on}
+                                  title={on ? `Remove ${s.name}` : `Allow ${s.name}`}
+                                  onClick={() => toggleSection(r, s.key, s.name)}
+                                >
+                                  {s.name}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </td>
+                    )}
                     <td>
                       {r.is_admin ? (
                         <span className="adm-meta">All teams (admin)</span>
@@ -260,11 +339,13 @@ export function AdminUsers({ selfEmail }: { selfEmail: string }) {
   );
 }
 
-function AddUserForm({ busy, onSubmit, onCancel }: {
+function AddUserForm({ busy, showSections, onSubmit, onCancel }: {
   busy: boolean;
-  onSubmit: (p: { email: string; password: string; sp: string; isAdmin: boolean; canViewAll: boolean }) => void;
+  showSections: boolean;
+  onSubmit: (p: { email: string; password: string; sp: string; isAdmin: boolean; canViewAll: boolean; sections: string[] }) => void;
   onCancel: () => void;
 }) {
+  const [sections, setSections] = useState<string[]>([]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [sp, setSp] = useState(SP_OPTIONS[0]);
@@ -278,7 +359,7 @@ function AddUserForm({ busy, onSubmit, onCancel }: {
       className="adm-add"
       onSubmit={e => {
         e.preventDefault();
-        if (valid) onSubmit({ email: email.trim().toLowerCase(), password, sp, isAdmin, canViewAll: canViewAll || isAdmin });
+        if (valid) onSubmit({ email: email.trim().toLowerCase(), password, sp, isAdmin, canViewAll: canViewAll || isAdmin, sections });
       }}
     >
       <div className="adm-fields">
@@ -303,6 +384,18 @@ function AddUserForm({ busy, onSubmit, onCancel }: {
         <label><input type="checkbox" checked={isAdmin} disabled={busy} onChange={e => setIsAdmin(e.target.checked)} /> Admin (manages users and files)</label>
         <label><input type="checkbox" checked={canViewAll || isAdmin} disabled={busy || isAdmin} onChange={e => setCanViewAll(e.target.checked)} /> Sees all teams <span className="adm-meta">(admins always do)</span></label>
       </div>
+      {showSections && !isAdmin && (
+        <div className="adm-checks" role="group" aria-label="Sections this person can open">
+          <span className="label">Sections</span>
+          {SECTIONS.map(s => (
+            <label key={s.key}>
+              <input type="checkbox" disabled={busy} checked={sections.includes(s.key)}
+                onChange={e => setSections(cur => e.target.checked ? [...cur, s.key] : cur.filter(k => k !== s.key))} />
+              {s.name}
+            </label>
+          ))}
+        </div>
+      )}
       <div className="adm-inline">
         <button type="submit" className="btn primary" disabled={busy || !valid}>{busy ? "Creating…" : "Create account"}</button>
         <button type="button" className="btn" disabled={busy} onClick={onCancel}>Cancel</button>

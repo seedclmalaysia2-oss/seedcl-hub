@@ -78,7 +78,19 @@ project, so it is the same accounts and nothing new to deploy.
 - **Where the rule is enforced.** In Postgres, not here. Each `admin_*` function
   checks `current_user_is_admin()` and the last-admin guard is a database trigger.
   The prompt is a step-up check on top of that, not the lock.
-- Files: `admin-button.tsx` (button + prompt), `admin-users.tsx` (panel).
+- **Sections (which dashboards each person may open).** The Users panel has a
+  Sections column of toggles, and the Add-user form has the same checkboxes. They
+  edit `app.staff.departments`, the list the Account, Administration (`gm`) and
+  Warehouse dashboards already check; admins can open everything. The hub also
+  shows a tile as "No access" when that dashboard would refuse the person.
+  - It needs `supabase/0001_department_access.sql` run once in Supabase Studio →
+    SQL Editor. Until then the panel says so and no tile is locked.
+  - **Sales and Human Resources don't check `departments` yet** (Sales gates on
+    `sp_user_map`, HR on its own roles). Ticking them records the choice but
+    doesn't stop anyone, so the hub doesn't lock those tiles (`enforced: false` in
+    `departments.ts`). Make each dashboard check its key, then flip the flag.
+- Files: `admin-button.tsx` (button + prompt), `admin-users.tsx` (panel),
+  `departments.ts` (each tile's section key and whether it is enforced).
 - Needs the Sales dashboard's migrations `0007`–`0018` to be applied (they already
   are in the shared project).
 

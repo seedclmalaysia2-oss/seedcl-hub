@@ -25,6 +25,17 @@ export default async function Home() {
     .maybeSingle();
   const isAdmin = !!profile?.is_admin;
 
+  // Which sections this person may open: app.staff.departments, read through a
+  // definer function because the `app` schema isn't exposed. A tile is only
+  // locked when that dashboard really refuses the person (`enforced`), and never
+  // when the answer is unavailable (function not installed, or the call failed):
+  // the dashboards are the boundary, this just keeps the hub honest.
+  const { data: accessRows, error: accessError } = await supabase.rpc("my_department_access");
+  const staff = (accessRows as { departments: string[] | null; is_admin: boolean; active: boolean }[] | null)?.[0];
+  const seesAll = isAdmin || !!(staff?.active && staff.is_admin);
+  const mayOpen = (d: { key: string; enforced: boolean }) =>
+    !!accessError || seesAll || !d.enforced || !!(staff?.active && staff.departments?.includes(d.key));
+
   const liveCount = DEPARTMENTS.filter(d => d.status === "live").length;
 
   return (
@@ -65,22 +76,37 @@ export default async function Home() {
             </div>
             <div className="grid">
               {items.map(dept => {
+                const locked = dept.status === "live" && !mayOpen(dept);
                 const inner = (
                   <>
                     <div className="dept-top">
                       <h2>{dept.name}</h2>
-                      <span className={`pill ${dept.status}`}>
-                        <span className="dot" />
-                        {PILL_LABEL[dept.status]}
-                      </span>
+                      {locked ? (
+                        <span className="pill noaccess">
+                          <span className="dot" />
+                          No access
+                        </span>
+                      ) : (
+                        <span className={`pill ${dept.status}`}>
+                          <span className="dot" />
+                          {PILL_LABEL[dept.status]}
+                        </span>
+                      )}
                     </div>
                     <p className="desc">{dept.description}</p>
                     <div className="host">
-                      {dept.status === "live" && <span className="arrow">→</span>}
-                      {dept.host}
+                      {dept.status === "live" && !locked && <span className="arrow">→</span>}
+                      {locked ? "Ask an admin to add this section to your account" : dept.host}
                     </div>
                   </>
                 );
+                if (locked) {
+                  return (
+                    <div className="dept planned locked" key={dept.name} aria-disabled="true">
+                      {inner}
+                    </div>
+                  );
+                }
                 return dept.status === "live" ? (
                   <a className="dept" key={dept.name} href={`https://${dept.host}`}>
                     {inner}
