@@ -3,6 +3,13 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { DEPARTMENTS, GROUPS, PILL_LABEL } from "./departments";
 import { AdminButton } from "./admin-button";
 import { SignOutButton } from "./sign-out-button";
+import { RefreshButton } from "./refresh-button";
+import { buildLabel } from "@/lib/build-number";
+
+function initials(name: string) {
+  const w = name.trim().split(/[\s._-]+/).filter(Boolean);
+  return ((w[0]?.[0] ?? "") + (w[1]?.[0] ?? "")).toUpperCase() || "?";
+}
 
 // Never prerender: the page depends on who is asking.
 export const dynamic = "force-dynamic";
@@ -37,13 +44,52 @@ export default async function Home() {
     !!accessError || seesAll || !d.enforced || !!(staff?.active && staff.departments?.includes(d.key));
 
   const liveCount = DEPARTMENTS.filter(d => d.status === "live").length;
+  const build = await buildLabel();
+  const meta = (user.user_metadata ?? {}) as { full_name?: string; name?: string };
+  const name = meta.full_name || meta.name || (user.email ?? "").split("@")[0];
+  const role = seesAll ? "Admin" : "Staff";
 
   return (
-    <div className="wrap">
-      <div className="userbar">
-        <span>{user.email}</span>
-        <SignOutButton />
+    <>
+    {/* SEED top navigation (house standard, as on every SEED dashboard): logo, app
+        pill, build and refresh on the left; the hub's own buttons in the middle;
+        who is signed in and the exit icon at the right end. */}
+    <header className="tb">
+      <div className="tb-left">
+        <a className="tb-brand" href="/" aria-label="SEED CL HUB, home">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="tb-logo" src="/seed-logo.png" alt="" width={58} height={30} />
+        </a>
+        <span className="tb-pill">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" /><rect x="13.5" y="3.5" width="7" height="7" rx="1.5" /><rect x="3.5" y="13.5" width="7" height="7" rx="1.5" /><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+          </svg>
+          SEED CL HUB
+        </span>
+        <span className="tb-build">{build ?? "test build"}</span>
+        <RefreshButton />
       </div>
+      <nav className="tb-nav" aria-label="Top bar">
+        <a className="tb-link" href="/" aria-current="page">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h5v-6h4v6h5V9.5" />
+          </svg>
+          Dashboards
+        </a>
+        <AdminButton email={user.email ?? ""} isAdmin={isAdmin} />
+      </nav>
+      <div className="tb-right">
+        <div className="tb-who" aria-label="Signed in as">
+          <span className="tb-avatar" aria-hidden="true">{initials(name)}</span>
+          <span className="tb-who-text">
+            <span className="tb-name" title={user.email ?? name}>{name}</span>
+            <span className="tb-role">{role}</span>
+          </span>
+        </div>
+        <SignOutButton icon />
+      </div>
+    </header>
+    <div className="wrap">
 
       <header className="masthead">
         <div className="mark">SC</div>
@@ -60,7 +106,6 @@ export default async function Home() {
             <div className="num">{liveCount} / {DEPARTMENTS.length}</div>
             <div className="label">Live</div>
           </div>
-          <AdminButton email={user.email ?? ""} isAdmin={isAdmin} />
         </div>
       </header>
 
@@ -128,5 +173,6 @@ export default async function Home() {
         <span><span className="key">Queued</span> — not started</span>
       </div>
     </div>
+    </>
   );
 }

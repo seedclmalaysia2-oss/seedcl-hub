@@ -59,6 +59,9 @@ export function AdminButton({ email, isAdmin }: { email: string; isAdmin: boolea
   return (
     <>
       <button type="button" className="admin-btn" onClick={() => setOpen(true)}>
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.3 7.5 9.5 4.3-1.2 7.5-4.9 7.5-9.5V6L12 3Z" />
+        </svg>
         Admin
       </button>
 
