@@ -2,6 +2,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { WelcomeSplash, rememberedName, rememberName } from "../welcome-splash";
 
 type Mode = "signin" | "forgot" | "reset";
 
@@ -16,6 +17,8 @@ function LoginForm() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [info, setInfo] = useState("");
+  // Set once signed in: the welcome screen covers the page while the hub loads.
+  const [welcome, setWelcome] = useState<string | null>(null);
 
   // Reset links come back here in three shapes. The @supabase/ssr browser
   // client runs the PKCE flow, so on its own it only understands ?code= —
@@ -85,6 +88,14 @@ function LoginForm() {
           : error.message);
         return;
       }
+      // The welcome screen goes up at once and the name follows; nothing waits for it.
+      setWelcome(rememberedName(email));
+      fetch("/api/welcome-name", { cache: "no-store" })
+        .then(r => (r.ok ? r.json() : null))
+        .then((d: { name?: string | null } | null) => {
+          if (d?.name) { setWelcome(d.name); rememberName(email, d.name); }
+        })
+        .catch(() => {});
       // Hard navigation so the browser sends the fresh session cookie.
       window.location.assign(sp.get("next") || "/");
       return;
@@ -117,8 +128,12 @@ function LoginForm() {
     window.location.assign("/");
   }
 
+  if (welcome !== null) return <WelcomeSplash name={welcome} />;
+
   return (
     <div className="login-wrap">
+      {/* Fetched now so the welcome screen's logo is ready the moment it shows. */}
+      <link rel="preload" as="image" href="/seed-logo.png" />
       <form className="login-card" onSubmit={submit}>
         <div className="mark">SC</div>
         <h1>{mode === "reset" ? "Set a new password" : "SEED CL Malaysia"}</h1>

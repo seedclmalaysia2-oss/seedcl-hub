@@ -53,5 +53,6 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // seed-logo.png is exempt so the login page's welcome screen can show the logo before sign-in.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|seed-logo\\.png$).*)"],
 };
